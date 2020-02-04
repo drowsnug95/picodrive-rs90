@@ -1,0 +1,14 @@
+mipsel-linux-gcc /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025-
+mipsel-linux-gcc /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025- -lz
+mipsel-linux-gcc -c /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025-.o
+mipsel-linux-gcc -c /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025-.o
+/tmp/picodrive-conf--29025-.c:1:12: fatal error: libavcodec/avcodec.h: No such file or directory
+   #include <libavcodec/avcodec.h>
+            ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+mipsel-linux-gcc -I/opt/rs90-toolchain/mipsel-rs90-linux-musl/sysroot/usr/bin/../../usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025- -L/opt/rs90-toolchain/mipsel-rs90-linux-musl/sysroot/usr/bin/../../usr/lib -lSDL -lpthread
+mipsel-linux-gcc -I/opt/rs90-toolchain/mipsel-rs90-linux-musl/sysroot/usr/bin/../../usr/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -c /tmp/picodrive-conf--29025-.c -o /tmp/picodrive-conf--29025-.o -Wno-unused-result
+/tmp/picodrive-conf--29025-.c: In function ‘test’:
+/tmp/picodrive-conf--29025-.c:1:31: warning: implicit declaration of function ‘fread’ [-Wimplicit-function-declaration]
+ void test(void *f, void *d) { fread(d, 1, 1, f); }
+                               ^~~~~
