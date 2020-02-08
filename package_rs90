@@ -1,9 +1,11 @@
 #!/bin/sh
 
 mkdir -p opk
+mipsel-linux-strip ./PicoDrive
 cp ./PicoDrive opk/PicoDrive
     cp -r ./platform/opendingux/data/skin opk/
 cp ./platform/opendingux/data/megadrive.png opk/icon.png
+rm ./opk/skin/font.png
 
 # https://unix.stackexchange.com/questions/219268/how-to-add-new-lines-when-using-echo
 print()

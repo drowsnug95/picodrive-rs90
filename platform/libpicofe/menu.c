@@ -158,8 +158,6 @@ static void smalltext_out16_(int x, int y, const char *texto, int color)
 	int multiplier = me_sfont_w / 6;
 	int i;
     
-    x+=32; //for rs-90
-
 	for (i = 0;; i++, x += me_sfont_w)
 	{
 		unsigned char c = (unsigned char) texto[i];
@@ -194,7 +192,8 @@ static void smalltext_out16_(int x, int y, const char *texto, int color)
 static void smalltext_out16(int x, int y, const char *texto, int color)
 {
 	char buffer[128];
-	int maxw = (g_menuscreen_w - x) / me_sfont_w;
+	//int maxw = (g_menuscreen_w - x) / me_sfont_w;
+    int maxw = 36; //for rs-90
 
 	if (maxw < 0)
 		return;
@@ -207,22 +206,30 @@ static void smalltext_out16(int x, int y, const char *texto, int color)
 	smalltext_out16_(x, y, buffer, color);
 }
 
-static void menu_draw_selection(int x, int y, int w)
+static void menu_draw_selection(int x, int y, int wp)
 {
-	int i, h;
+	int i, h, w;
 	unsigned short *dst, *dest;
 
 	text_out16_(x, y, (void *)1, (menu_sel_color < 0) ? menu_text_color : menu_sel_color);
 
 	if (menu_sel_color < 0) return; // no selection hilight
 
+    w = wp;
+    if(w>160)
+        w=160;
+    
 	if (y > 0) y--;
-	dest = (unsigned short *)g_menuscreen_ptr + x + y * g_menuscreen_pp + me_mfont_w * 2 - 2;
+	dest = (unsigned short *)g_menuscreen_ptr + x + y * g_menuscreen_pp + (me_mfont_w-2) * 2 - 2;
 	for (h = me_mfont_h + 1; h > 0; h--)
 	{
 		dst = dest;
-		for (i = w - (me_mfont_w * 2 - 2); i > 0; i--)
-			*dst++ = menu_sel_color;
+		for (i = w - ((me_mfont_w-2) * 2 - 2); i > 0; i--){
+            if(i<240)
+                *dst++ = menu_sel_color;
+            else
+                *dst++;
+        }
 		dest += g_menuscreen_pp;
 	}
 }
@@ -350,8 +357,9 @@ void menu_init_base(void)
 
 static void menu_darken_bg(void *dst, void *src, int pixels, int darker)
 {
+    return; //for rs-90
 	unsigned int *dest = dst;
-	unsigned int *sorc = src;
+	unsigned int *sorc = src;        
 	pixels /= 2;
 	if (darker)
 	{
@@ -511,7 +519,7 @@ static void me_draw(const menu_entry *entries, int sel, void (*draw_more)(void))
 	const menu_entry *ent, *ent_sel = entries;
 	int x, y, w = 0, h = 0;
 	//int offs, col2_offs = 27 * me_mfont_w;
-	int offs, col2_offs = 17 * me_mfont_w;
+	int offs, col2_offs = 17 * (me_mfont_w-2);
 	int vi_sel_ln = 0;
 	const char *name;
 	int i, n;
@@ -592,15 +600,17 @@ static void me_draw(const menu_entry *entries, int sel, void (*draw_more)(void))
 #endif
 
     //for rs-90
-    if ( w > 256)
-        w=192;
-    x=32;
+    w = 240;
+    h = 160;
+    x = 12;
+    y = 12;
+    col2_offs = 140;
     //for rs-90
     
 	/* draw */
 	menu_draw_begin(1, 0);
 	menu_draw_selection(x, y + vi_sel_ln * me_mfont_h, w);
-	x += me_mfont_w * 2;
+	x += (me_mfont_w-2) * 2;
 
 	for (ent = entries; ent->name; ent++)
 	{
@@ -739,10 +749,8 @@ static int me_loop_d(menu_entry *menu, int *menu_sel, void (*draw_prep)(void), v
 	while ((!menu[sel].enabled || !menu[sel].selectable) && sel < menu_sel_max)
 		sel++;
 
-    printf("%s,%d\n",__FILE__,__LINE__);
 	/* make sure action buttons are not pressed on entering menu */
 	me_draw(menu, sel, NULL);
-    printf("%s,%d\n",__FILE__,__LINE__);
 	while (in_menu_wait_any(NULL, 50) & (PBTN_MOK|PBTN_MBACK|PBTN_MENU));
 
 	for (;;)
@@ -888,7 +896,6 @@ static void do_delete(const char *fpath, const char *fname)
 static void draw_dirlist(char *curdir, struct dirent **namelist,
 	int n, int sel, int show_help)
 {
-    printf("%s,%d\n",__FILE__,__LINE__);
 	int max_cnt, start, i, x, pos;
 	void *darken_ptr;
 	char buff[64];
@@ -1213,7 +1220,7 @@ rescan:
 
 // ------------ savestate loader ------------
 
-#define STATE_SLOT_COUNT 10
+#define STATE_SLOT_COUNT 5
 
 static int state_slot_flags = 0;
 static int state_slot_times[STATE_SLOT_COUNT];
@@ -1252,6 +1259,10 @@ static void draw_savestate_menu(int menu_sel, int is_loading)
 		x = 12 + me_mfont_w * 2;
 #endif
 
+    //for rs-90
+    x = 12;
+    y = 12;
+    
 	menu_draw_begin(1, 1);
 
 	text_out16(x, y, is_loading ? "Load state" : "Save state");
@@ -1416,12 +1427,16 @@ static void draw_key_config(const me_bind_action *opts, int opt_cnt, int player_
 		x = me_mfont_w * 2;
 	if (y < 0)
 		y = 0;
+    
+    //for rs-90
+    x = 32;
+    y = 12;
 	menu_draw_begin(1, 0);
 	if (player_idx >= 0)
 		text_out16(x, y, "Player %i controls", player_idx + 1);
 	else
 		text_out16(x, y, "Emulator controls");
-
+    
 	y += 2 * me_mfont_h;
 	menu_draw_selection(x - me_mfont_w * 2, y + sel * me_mfont_h, w + 2 * me_mfont_w);
 
@@ -1447,10 +1462,12 @@ static void draw_key_config(const me_bind_action *opts, int opt_cnt, int player_
 		snprintf(buff2, sizeof(buff2), "%s", in_get_key_name(-1, -PBTN_MOK));
 		snprintf(buff, sizeof(buff), "%s - bind, %s - clear", buff2,
 				in_get_key_name(-1, -PBTN_MA2));
-		text_out16(x, g_menuscreen_h - 4 * me_mfont_h, buff);
+		//text_out16(x, g_menuscreen_h - 4 * me_mfont_h, buff);
+		text_out16(x, 12 + me_mfont_h, buff);
 	}
 	else
-		text_out16(x, g_menuscreen_h - 4 * me_mfont_h, "Press a button to bind/unbind");
+		//text_out16(x, g_menuscreen_h - 4 * me_mfont_h, "Press a button to bind/unbind");
+		text_out16(x, 12 + me_mfont_h, "Press a button to bind");
 
 	if (dev_count > 1) {
 		text_out16(x, g_menuscreen_h - 3 * me_mfont_h, dev_name);
